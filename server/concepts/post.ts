@@ -27,6 +27,17 @@ export default class PostConcept {
     await this.posts.deleteOne({ _id });
     return { msg: "Post deleted successfully!" };
   }
+
+  async getByAuthor(postQuery: Filter<PostDoc>) {
+    const post = await this.posts.readOne({ postQuery });
+    return post;
+  }
+
+  async getByID(_id: ObjectId) {
+    const postQuery = { _id: _id };
+    const post = await this.posts.readOne(postQuery);
+    return post;
+  }
 }
 
 export class PostAuthorNotMatchError extends NotAllowedError {

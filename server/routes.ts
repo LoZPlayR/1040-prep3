@@ -3,7 +3,8 @@ import { Filter, ObjectId } from "mongodb";
 import { Router, getExpressRouter } from "./framework/router";
 
 import { Post, User, WebSession } from "./app";
-import { PostDoc } from "./concepts/post";
+import { NotFoundError } from "./concepts/errors";
+import { PostAuthorNotMatchError, PostDoc } from "./concepts/post";
 import { UserDoc } from "./concepts/user";
 import { WebSessionDoc } from "./concepts/websession";
 
@@ -64,7 +65,18 @@ class Routes {
   async deletePost(session: WebSessionDoc, _id: ObjectId) {
     // TODO 3: Delete the post with given _id
     // Make sure the user deleting is the author of the post
-    throw new Error("Not implemented!");
+    const user = WebSession.getUser(session);
+    const post = await Post.getByID(_id);
+
+    if (post === null) {
+      throw new NotFoundError("ID doesn't match!");
+    } else {
+      const OP = post["author"];
+      if (user !== OP) {
+        throw new PostAuthorNotMatchError(OP, user);
+      }
+      return await Post.delete(_id);
+    }
   }
 }
 
